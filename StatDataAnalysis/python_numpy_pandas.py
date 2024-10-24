@@ -15,6 +15,9 @@ type(True)
 5/2
 type(5/2) # uff...
 
+type("True")
+"True"[0]
+
 
 ###############################################################################
 # list - sequential, mutable, can store objects of different kinds
@@ -26,27 +29,38 @@ len(x)
 [type(e) for e in x] # check the types of all elements
 
 # indexing and slicing: also for tuples and strings
-x = list(range(20))
+x = list(range(10))
 
 x[0]
 x[0] = 'other value'
 x[-2] # x[len(x)-2]
 
 x[2:5] # from:to (without 'to')
-x[2:5] = ['some value']
+x[2:5] = ['value']
 x[2:]
 x[:5]
 x[2:9:2] # from:to:by
 x[9:5:-1]
 x[::-1] # reverse
 
+
+x = list(range(10))
+x2 = x
+x2[3] = "value"
+x2
+x
+x2 = x.copy()
+x2[3] = 'XXXXXX'
+x2
+x
+
 x[:3] + x[:3]
 
 type(x[0])
 type(x[0:1])
 
-x[(3, 7, 8)] # :(
-[x[i] for i in [3, 7, 8]]
+x[(3, 1, 2)] # :(
+[x[i] for i in [3, 1, 2]]
 
 
 # list comprehension
@@ -54,7 +68,7 @@ x = []
 for e in range(5):
     x.append(2*e)
 
-[2*e for e in range(5)]
+[2 * e for e in range(5)]
 
 # operations on list are not vectorized
 [1, 2, 3] + 2
@@ -114,14 +128,16 @@ type(x)
 x = (1, 'a', lambda x : x**2, {'b' : 5}, [2, 3], (4, 5))
 type(x)
 [type(e) for e in x]
-# actually, what creates a tuple is not the brackets, but commas
 
+# actually, what creates a tuple is not the brackets, but commas
 x = 1, 2
 type(x)
 # one of the many reasons why a comma is not a good decimal point...
 
 
+
 # indexing - same as list
+x = (1, 'a', lambda x : x**2, {'b' : 5}, [2, 3], (4, 5))
 x[0]
 x[:3]
 x[2](5)
@@ -147,6 +163,9 @@ type(y)
 for e in y: print(e)
 for e in y: print(e) # now y is 'used'
 
+y = (e**2 for e in range(5))
+next(y)
+
 ###############################################################################
 # dictionaries
 
@@ -163,6 +182,7 @@ for key in d:
     print(f'key: {key}, value: {d[key]}')
 
 # dict comprehensions are also possible
+{key : key + '_w' for key in ['a', 'b', 'c']}
 
 ###############################################################################
 # strings - sequential
@@ -230,6 +250,7 @@ y = x[:3]
 y[0] = 100
 x
 
+x = np.arange(10)
 x_list = x.tolist()
 y_list = x_list[:3]
 y_list[0] = 100
@@ -262,6 +283,7 @@ x[np.tile([True, False], 5)]
 x[x > 5]
 
 # 'and' and 'or' are not vectorized, we need other operators '|' and '&'
+x[(x < 3) or (x > 6)]
 x[(x < 3) | (x > 6)]
 
 
