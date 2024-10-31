@@ -5,18 +5,58 @@ import matplotlib.pyplot as plt
 import scipy.stats
 
 
-
-N = 100
-
-
 # First, let us do the task for just one distribution and plot results
 # to see what is happening on a simple data frame
 
+n = 10_000
+
+# Let us see how mean changes when another observation os drawn
+x = np.random.normal(0, 1, n)
+plt.hlines(0, xmin=0, xmax=n, color = 'k')
+plt.plot(np.arange(n), np.cumsum(x) / np.arange(n))
+plt.xlabel("Number of observations n")
+plt.ylabel("Mean of a sample of length n")
+plt.title("Normal distribution")
+# We can see, that as sam[ple gets bigger, the mean is
+# closer and closer to the location parameter
+
+x = np.random.standard_cauchy(n)
+plt.hlines(0, xmin=0, xmax=n, color = 'k')
+plt.plot(np.arange(n), np.cumsum(x) / np.arange(n))
+plt.xlabel("Number of observations n")
+plt.ylabel("Mean of a sample of length n")
+plt.title("Cauchy distribution")
+# From time to time surprisingly large or small observation is 
+# drawn, and the mean value of the whole sample is changing
+# significantly
+
+# Comparing the distributions:
+# The difference seems small, but it is not, cauchy has, so called, 
+# fat tails and no expected value
+t = np.linspace(-10, 10, 100)
+plt.plot(t, scipy.stats.norm(0, 1).pdf(t), label="normal")
+plt.plot(t, scipy.stats.cauchy.pdf(t), label='cauchy')
+plt.legend()
+
+# P(X <= -3):
+scipy.stats.norm(0, 1).cdf(-3)
+scipy.stats.cauchy.cdf(-3)
+
+t = np.linspace(-10, 10, 100)
+plt.plot(t, scipy.stats.norm(0, 1).pdf(t), label="normal")
+plt.plot(t, scipy.stats.cauchy.pdf(t), label='cauchy')
+plt.vlines(-3, 0, 0.1, 'k', 'dashed')
+
+scipy.stats.cauchy.cdf(-10)
+(x < -10).mean()
+
 # simple data frames for storing the results
+
+N = 100
+
 results_mean = pd.DataFrame(np.nan, 
                             index = range(N), 
                             columns = [10, 100, 1_000, 10_000])
-
 
 results_median = results_mean.copy()
 results_trimmed = results_mean.copy()
@@ -25,9 +65,9 @@ for n in results_mean.columns:
 
     # random sample for given n and all N simulations simulnaneously
     
-    x = np.random.normal(0, 1, (N, n)) # each row consists of 1 sample of length n
+    #x = np.random.normal(0, 1, (N, n)) # each row consists of 1 sample of length n
     #x = np.random.exponential(1, (N, n))
-    #x = np.random.standard_cauchy((N, n))
+    x = np.random.standard_cauchy((N, n))
     
 
     # calculating required statistics
@@ -100,6 +140,7 @@ results = results.stack(level=[0,2]) \
     .unstack(level=0) \
     .reorder_levels(axis=0, order = [1, 0]).sort_index(axis=0) \
     .reorder_levels(axis=1, order = [1, 0]).sort_index(axis=1)
+
 
 # exporting data to csv
 results.to_csv('results.csv')
