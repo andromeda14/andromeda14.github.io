@@ -10,27 +10,28 @@ import matplotlib.pyplot as plt
 
 # sample from given distributions
 n = 50
+
 x = np.random.normal(9, 1, n)
 x.mean()
 
-#x = np.random.standard_t(1, n) + 9
-#x.mean()
+x = np.random.standard_t(5, n) + 9
+x.mean()
 
-#x = np.random.gamma(shape=2, scale=4.5, size=n)
-#x.mean()
+x = np.random.gamma(shape=2, scale=4.5, size=n)
+x.mean()
 
 ###############################################################################
 ## a
 
 # plot histograms
 fig = plt.figure(dpi = 500)
-plt.hist(x, density = True)
+plt.hist(x)
 
-
-# we can add density function to histograms, but with additional parameter
+# by default hist plots the number of observations in ech group
+# to add density function to histograms, we need add additional parameter
 # density=True
 
-fig = plt.figure(dpi = 1000)
+#fig = plt.figure(dpi = 1000)
 plt.hist(x, density = True)
 
 t = np.linspace(5, 13, 100)
@@ -55,8 +56,11 @@ x_standardized /= x_standardized.std()
 
 sm.qqplot(x_standardized, line='45')
 
-# or 'manually': OX: theoretical quantiles, OY" empicical quantiles
-qs = np.linspace(0, 1, 101)
+# or 'manually': OX: theoretical quantiles, OY: empicical quantiles
+qs = np.linspace(0, 1, 101) # probablities
+# scipy.stats.norm.ppf(qs) - theoretical quantiles of normal distribution
+#                            calculated for probs qs
+# np.quantile(x_standardized, qs) - empirical quantiles for our sample
 plt.scatter(scipy.stats.norm.ppf(qs), np.quantile(x_standardized, qs))
 plt.axline((0, 0), slope=1, c='k')
 
@@ -65,7 +69,7 @@ plt.axline((0, 0), slope=1, c='k')
 '''
 Make sure that you know and understand notions:
 - Type I error vs. Type II error
-- Significance level: alpha
+- Significance level alpha
 - Power of the test: 1 - beta
 - Null hypothesis: H0 and Alternative hypothesis: H1
 - Test statistic, critical region, p-value
@@ -89,6 +93,8 @@ small p-value -> we reject H0,
                  most probably X is not F distributed
 big p-value -> we do not have reasons to reject H0, 
                there is not enough evidence to say that X is not F distr
+               
+alpha = 0.05               
 """
 
 np.random.seed(123)
@@ -204,6 +210,8 @@ results.head()
 import seaborn as sns
 sns.pairplot(results)
 
+results.boxplot()
 
+(results < 0.05).mean(axis=0)
 
 
