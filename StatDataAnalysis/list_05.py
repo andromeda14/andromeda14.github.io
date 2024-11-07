@@ -34,7 +34,7 @@ plt.scatter(X.iloc[:,0], X.iloc[:,1], c = y)
 
 # manuall pairplot
 fig, axs = plt.subplots(4, 4)
-fig.dpi = 1000
+fig.dpi = 500
 fig.set_figwidth(10)
 fig.set_figheight(10)
 
@@ -68,19 +68,26 @@ pd.options.display.max_columns = 5
 
 
 # correlations for all columns:
-X.corr()
+r = X.corr()
 np.corrcoef(X.T)
-scipy.stats.spearmanr(X)[0]
+rho = scipy.stats.spearmanr(X)[0] # [1] p-value
 tau = np.zeros((4,4))
 for i in range(4):
     for j in range(4):
         tau[i, j] = scipy.stats.kendalltau(X.iloc[:,i], X.iloc[:,j])[0]
 
+r
+pd.DataFrame(rho, columns=X.columns, index=X.columns)
+pd.DataFrame(tau, columns=X.columns, index=X.columns)
+
+pd.DataFrame(rho, columns=X.columns, index=X.columns) / \
+    pd.DataFrame(tau, columns=X.columns, index=X.columns)
+# rho (Spearman) tends to be larger than tau (Kendall)
+
 # what can we say about those correlations?
 # e.g. do longer sepals tend to be wider or narrower?
 
 # how will it change when we take into account grouping into species?
-
 data.groupby('target').corr()
 
 # see Simpson paradox
@@ -94,7 +101,7 @@ data.groupby('target').corr()
        https://en.wikipedia.org/wiki/Correlation#/media/File:Correlation_examples2.svg
     - spurious correlations
       e.g https://www.datasciencecentral.com/spurious-correlations-15-examples/
-    - simpson's paradox 
+    - Simpson's paradox 
       https://en.wikipedia.org/wiki/Simpson%27s_paradox
 """
 
@@ -104,7 +111,7 @@ def print_corrs(x, y):
     k = scipy.stats.kendalltau(x, y)[0]
     print(f'Pearson:  {p:.2f}\nSpearman: {s:.2f}\nKendall:  {k:.2f}')
 
-x = np.linspace(0, 10, 50)
+x = np.linspace(0, 3*np.pi, 50)
 
 y = np.sin(x)
 plt.scatter(x, y)
