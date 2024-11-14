@@ -5,15 +5,42 @@ Solutions to: 'Tests_CEC.pdf'
 
 import numpy as np
 import pandas as pd
+import statsmodels.api as sm 
 import matplotlib.pyplot as plt
 import scipy.stats
 
-data = pd.read_csv('DECEC17.csv', sep = ';')
+data = pd.read_csv('https://www.ibspan.waw.pl/~opara/res/DECEC17.csv', sep = ';')
 data.head()
 data.dtypes
 
 
 
+data.head()
+
+data.loc[data.loc[:, "Algorigthm"] == 'DE_rand_1_Cr10', :]
+
+data.loc[data.loc[:, "Function"] == 27, :]
+
+alg1 = data.loc[:, "Algorigthm"] == 'DE_rand_1_Cr10'
+alg9 = data.loc[:, "Algorigthm"] == 'DE_rand_1_Cr90'
+fun = data.loc[:, "Function"] == 27
+
+data.loc[alg1 & fun, :].head()
+
+err_cols = data.columns.str.match('^Err.*')
+
+data.loc[alg1 & fun, err_cols].head()
+
+data.loc[alg1 & fun, err_cols].values
+
+data.loc[alg1 & fun, err_cols].values.shape
+
+data.loc[alg1 & fun, err_cols].values.flatten().shape
+
+x1 = data.loc[alg1 & fun, err_cols].values.flatten()
+x9 = data.loc[alg9 & fun, err_cols].values.flatten()
+
+g
 # (a)
 err_cols = data.columns.str.match('^Err.*')
 data.loc[:, err_cols].head()
@@ -89,12 +116,14 @@ scipy.stats.shapiro(x9).pvalue
 # it is rejected
 
 # (e)
+# Assumptions of KS-test: ?
 # Is it a good idea to test normality with KS test?
 
 scipy.stats.kstest(x1, scipy.stats.norm.cdf, args=(x1.mean(), x1.std())).pvalue
 scipy.stats.kstest(x9, scipy.stats.norm.cdf, args=(x9.mean(), x9.std())).pvalue
 
 # (f)
+# Assumptions for t-test?
 
 scipy.stats.ttest_ind(x1, x9).pvalue
 
@@ -122,6 +151,7 @@ results = pd.DataFrame({'Function' : all_functions,
                         't' : np.repeat(np.nan, all_functions.shape[0]),
                         'ranksums' : np.repeat(np.nan, all_functions.shape[0])})
 
+
 for i in range(results.shape[0]):
     x1 = data.loc[((data.loc[:, 'Algorigthm'] == 'DE_rand_1_Cr10') &
                    (data.Function == all_functions[i])), 
@@ -140,12 +170,32 @@ results.set_index('Function')
 results.loc[:, ['t', 'ranksums']] < 0.05
 results.head()
 
+# or we can test multiple vectors at once:
+x1 = data.loc[(data.loc[:, 'Algorigthm'] == 'DE_rand_1_Cr10'), 
+              err_cols | (data.columns == 'Function')]
+x2 = data.loc[(data.loc[:, 'Algorigthm'] == 'DE_rand_1_Cr90'), 
+              err_cols | (data.columns == 'Function')]
+
+df = pd.merge(x1, x2, on = 'Function')
+
+x1 = df.loc[:, df.columns.str.match('^Err_\d+_x$')]
+x9 = df.loc[:, df.columns.str.match('^Err_\d+_y$')]
+
+
+scipy.stats.ttest_ind(x1.T, x9.T).pvalue
+scipy.stats.ranksums(x1.T, x9.T).pvalue
+
+
+plt.scatter(np.arange(results.shape[0]), 
+            results.t.values - results.ranksums.values)
+
 
 
 # (i)
 results2 = results.melt(id_vars = 'Function')
-results2.loc[:, ['value']] = results2.loc[:, ['value']] < 0.05
-pd.crosstab(index = results2['variable'], columns=results2['value'])
+results2['if_value'] = results2.loc[:, ['value']] < 0.05
+results2.head()
+pd.crosstab(index = results2['variable'], columns=results2['if_value'])
 
 
 tmp = np.logical_xor(results.t.values < 0.05, ~(results.ranksums.values < 0.05))
